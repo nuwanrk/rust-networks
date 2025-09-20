@@ -1,5 +1,8 @@
+use api::tcp_client;
+
 mod api;
+mod snowcast;
 
 fn main() {
-    println!("Hello, world!");
+    tcp_client();
 }
