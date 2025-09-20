@@ -2,9 +2,46 @@
 
 use std::{io, thread};
 use std::io::{BufRead, BufReader, Error, Read, Write};
-use std::net::{TcpListener, TcpStream};
+use std::net::{TcpListener, TcpStream, UdpSocket};
 use std::time::Duration;
 use rand::{thread_rng, Rng};
+
+const ADDRESS:&str = "127.0.0.1:32100";
+
+pub fn udp_server() {
+    println!("starting the udp server...");
+    let socket = UdpSocket::bind(ADDRESS).expect("could not bind");
+    loop {
+        let mut buf = [0u8;1500];
+        let sock = socket.try_clone().expect("failed to clone the socket");
+        match sock.recv_from(&mut buf) {
+            Ok((_,src)) => {
+                thread::spawn(move || {
+                    println!("handling a connection from {}", src);
+                    sock.send_to(&buf, &src).expect("failed to send a response");
+                });
+            },
+            Err(e) => {eprintln!("couldn't receive a datagram: {}", e)}
+        }
+    }
+}
+
+pub fn udp_client() {
+
+    let socket = UdpSocket::bind(ADDRESS).expect("could not bind");
+    socket.connect(ADDRESS).expect("could not connect to udp server");
+
+    loop {
+        let mut input = String::new();
+        let mut buffer = [0u8; 1500];
+        io::stdin().read_line(&mut input).expect("failed to read from stdin");
+        socket.send(input.as_bytes()).expect("failed to write to server");
+
+        socket.recv_from(&mut buffer).expect("could not read into buffer");
+        println!("{}", str::from_utf8(&buffer).expect("could not writer buffer as string"));
+    }
+}
+
 
 #[test]
 pub fn tcp_server() {
