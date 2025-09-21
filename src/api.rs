@@ -7,6 +7,7 @@ use std::time::Duration;
 use rand::{thread_rng, Rng};
 
 const ADDRESS:&str = "127.0.0.1:32100";
+const UDP_CLIENT_ADDRESS:&str = "127.0.0.1:32101";
 
 pub fn udp_server() {
     println!("starting the udp server...");
@@ -28,7 +29,7 @@ pub fn udp_server() {
 
 pub fn udp_client() {
 
-    let socket = UdpSocket::bind(ADDRESS).expect("could not bind");
+    let socket = UdpSocket::bind(UDP_CLIENT_ADDRESS).expect("could not bind");
     socket.connect(ADDRESS).expect("could not connect to udp server");
 
     loop {
